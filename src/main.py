@@ -7,6 +7,7 @@ from CalcRating import CalcRating
 from DataReader import DataReader
 from JsonDataReader import JsonDataReader
 from TextDataReader import TextDataReader
+from ThirdQuartileStudents import ThirdQuartileStudents
 
 
 def get_path_from_arguments(args) -> str:
@@ -33,6 +34,15 @@ def main():
     print("Students: ", students)
     rating = CalcRating(students).calc()
     print("Rating: ", rating)
+    third_quartile = ThirdQuartileStudents(rating)
+    result = third_quartile.calc()
+    print(f"Q2 (медиана) = {third_quartile.q2:.2f}, "
+          f"Q3 = {third_quartile.q3:.2f}")
+    print("Студенты, чей рейтинг попадает в третью квартиль:")
+    if not result:
+        print("  таких студентов нет")
+    for name, score in result.items():
+        print(f"  {name}: {score:.2f}")
 
 
 if __name__ == "__main__":
