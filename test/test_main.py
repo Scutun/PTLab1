@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from src.main import get_path_from_arguments, get_reader
+import json
+
+from src.main import get_path_from_arguments, get_reader, main
 import pytest
 
 
@@ -40,3 +42,27 @@ def test_get_reader(path: str, reader_name: str) -> None:
 def test_get_reader_unsupported_format(path: str) -> None:
     with pytest.raises(ValueError):
         get_reader(path)
+
+
+def test_main_json(tmpdir, monkeypatch, capsys) -> None:
+    data = {
+        "A": {"математика": 60}, "B": {"математика": 70},
+        "C": {"математика": 80}, "D": {"математика": 90},
+        "E": {"математика": 100}
+    }
+    p = tmpdir.join("data.json")
+    p.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+    monkeypatch.setattr("sys.argv", ["main.py", "-p", str(p)])
+    main()
+    output = capsys.readouterr().out
+    assert "Q2 (медиана) = 80.00, Q3 = 90.00" in output
+    assert "  D: 90.00" in output
+    assert "  C: 80.00" not in output
+
+
+def test_main_txt_without_result(tmpdir, monkeypatch, capsys) -> None:
+    p = tmpdir.join("data.txt")
+    p.write_text("A\n    химия:80\nB\n    химия:80\n", encoding='utf-8')
+    monkeypatch.setattr("sys.argv", ["main.py", "-p", str(p)])
+    main()
+    assert "таких студентов нет" in capsys.readouterr().out
